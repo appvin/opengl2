@@ -3,13 +3,11 @@
 #include <GL\freeglut.h>
 
 using namespace std;
-const double Pi = 3.1415926536;
 
-void display_B_line() 
+int x0, x1, y00, y11, x2, y2, x3, y3;
+
+void display_B_line(int x0, int y0, int x1, int y1)
 { 
-	glClear(GL_COLOR_BUFFER_BIT);
-	int x0, x1, y0, y1;
-	cin >> x0 >> y0 >> x1 >> y1;
 	int dx = abs(x1 - x0);
 	int dy = abs(y1 - y0);
 	bool flag = 1;
@@ -25,7 +23,6 @@ void display_B_line()
 	int x = x0, y = y0;
 	int xi = (x1 - x0) > 0 ? 1 : -1;
 	int yi = (y1 - y0) > 0 ? 1 : -1;
-	glBegin(GL_POINTS);
 	glVertex2i(x0, y0);
 	while (x != x1)
 	{
@@ -44,19 +41,14 @@ void display_B_line()
 		else
 			glVertex2i(y, x);
 	}
-	glEnd();
-	glFlush(); 
+
 	cout << "complete" << endl;
 } 
 
-void display_B_circle()
+void display_B_circle(int x0, int y0, int r)
 {
-	glClear(GL_COLOR_BUFFER_BIT);
-	int x0, y0, r;
-	cin >> x0 >> y0 >> r;
 	int x = 0, y = r;
 	double d = 3 - 2 * r;
-	glBegin(GL_POINTS);
 	while (x <= y)
 	{
 		glVertex2i(x0 + x, y0 + y);
@@ -78,21 +70,74 @@ void display_B_circle()
 		}
 		x++;
 	}
-	
+	cout << "complete" << endl;
+}
+
+void display_DDA_line(int x0, int y0, int x1, int y1)
+{
+	int dx = x1 - x0, dy = y1 - y0, steps, k;
+	GLfloat xi, yi, x = GLfloat(x0), y = GLfloat(y0);
+
+	if (abs(dx) > abs(dy))
+		steps = abs(dx);
+	else
+		steps = abs(dy);
+	xi = dx / (GLfloat)steps;
+	yi = dy / (GLfloat)steps;
+	glVertex2i(int(round(x)), int(round(y)));
+	for (k = 0; k < steps; k++)
+	{
+		x += xi;
+		y += yi;
+		glVertex2i(int(round(x)), int(round(y)));
+	}
+	cout << "complete" << endl;
+}
+
+void display_DDA_circle(int x0, int y0, int r)
+{
+	int x = 0, y = r;
+	glBegin(GL_POINTS);
+	while (x <= y)
+	{
+		glVertex2i(x0 + x, y0 + y);
+		glVertex2i(x0 + x, y0 - y);
+		glVertex2i(x0 - x, y0 + y);
+		glVertex2i(x0 - x, y0 - y);
+		glVertex2i(x0 + y, y0 + x);
+		glVertex2i(x0 + y, y0 - x);
+		glVertex2i(x0 - y, y0 + x);
+		glVertex2i(x0 - y, y0 - x);
+		x++;
+		y = int(round(sqrt(pow(r, 2) - pow(x, 2))));
+	}
+	cout << "complete" << endl;
+}
+
+void display()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+	glBegin(GL_POINTS);
+	display_B_line(x0, y00, x1, y11);
+	display_B_circle(x0, y00, abs(x1));
+	display_DDA_line(x2, y2, x3, y3);
+	display_DDA_circle(x2, y2, abs(x3));
 	glEnd();
 	glFlush();
 }
 
 int main(int argc, char *argv[])
 {
+
+	cout << "all input" << endl;
+	cin >> x0 >> y00 >> x1 >> y11 >> x2 >> y2 >> x3 >> y3;
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE);
-	
-	glutInitWindowPosition(100, 100);
+	glutInitWindowPosition(200, 200);
 	glutInitWindowSize(500, 500);
-	glutCreateWindow("Bresenham's ");
+	glutCreateWindow("one window");
 	gluOrtho2D(-500, 500, -500, 500);
-	glutDisplayFunc(&display_B_circle);
+	glutDisplayFunc(&display);
 	glutMainLoop();
 	return 0;
 }
